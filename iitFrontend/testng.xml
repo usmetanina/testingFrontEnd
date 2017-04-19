@@ -1,0 +1,35 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="TaskLists" verbose="1" parallel="tests">
+    <!--<test name="Regression"   >-->
+    <!--<groups>-->
+    <!--<run>-->
+    <!--<include name="regression"/>-->
+    <!--</run>-->
+    <!--</groups>-->
+    <!--<packages>-->
+    <!--<package name="com.reltio.qa.wtm.tests" />-->
+    <!--</packages>-->
+    <!--</test>-->
+    <parameter name="browser" value="chrome" />
+    <parameter name="screen" value="largeDesktop" />
+    <test name="Chrome" >
+
+        <!--<groups>-->
+        <!--<run>-->
+        <!--<include name="tablet"/>-->
+        <!--</run>-->
+        <!--</groups>-->
+
+
+        <classes>
+            <class name="com.example.tests.MainPageTest" />
+        </classes>
+    </test>
+    <!--<test name="Firefox" >-->
+    <!--<parameter name="browser" value="firefox" />-->
+    <!--<classes>-->
+    <!--<class name="com.reltio.qa.wtm.tests.Login" />-->
+    <!--</classes>-->
+    <!--</test>-->
+</suite>
