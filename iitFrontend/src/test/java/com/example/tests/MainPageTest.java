@@ -10,12 +10,19 @@ import com.example.pages.DataPage;
 import com.example.pages.MainPage;
 import org.openqa.selenium.*;
 import org.openqa.selenium.Point;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
+import java.awt.HeadlessException;
+import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.event.InputEvent;
+import java.io.Console;
 import java.lang.reflect.Array;
 import java.util.Set;
 
@@ -52,7 +59,7 @@ public class MainPageTest extends BaseTest {
     }
 
     @Test
-    public void filterInstitutionByAddress() {
+    public void filterInstitutionByAddress_DMru_12() throws InterruptedException {
         openMainPage();
 
         $(withText("Образовательные учреждения города Москвы")).click();
@@ -66,56 +73,67 @@ public class MainPageTest extends BaseTest {
     }
 
     @Test
-    public void DisplayReferenceInformation() {
+    public void DisplayReferenceInformation_DMru_13() {
         openMainPage();
         $(withText("Детские развивающие центры")).parent().find(By.id("descLink")).click();
         $(withText("позволяет уточнить название спортивной зоны")).shouldBe(visible);
     }
 
-    @Test
-    public void DisplayInformationInMapMode() {
+    /*@Test
+    public void DisplayInformationInMapMode_DMru_14() throws InterruptedException {
         openMainPage();
         $(withText("предоставляющие право на бесплатное")).click();
         registerNewTab();
         $(By.cssSelector("a[href='/opendata/7710878000-vysshie-uchebnye-zavedeniya-goroda-moskvy-predostavlyayushchie-pravo-na-besplatnoe-oformlenie-sotsialnoy-karty/data/map?versionNumber=1&releaseNumber=8']"))
                 .click();
+        //$("svg").shouldBe(visible);
+        //$$("img[src='https://apidata.mos.ru/v1/datasets/2105/marker'").get(2).click();
+
+        $$(By.xpath("//*[@id='datasetMap']/div[1]/div[2]/div[3]/img[3]")).get(1).click();
+        //$(By.cssSelector("#datasetMap > div.leaflet-map-pane > div.leaflet-objects-pane > div.leaflet-marker-pane > img:nth-child(5)")).click();
+
+        //Assert.assertEquals($(By.id("card")).attr("class"),"map openOnMap"); //открылась панель слева
+    }*/
+
+    @Test
+    public void FilterTable_DMru_16()  {
+        openMainPage();
+        $(By.cssSelector("#datasets > div.sticky-list.scroll > ul > li:nth-child(13) > ul > li:nth-child(15) > a")).click();
         registerNewTab();
-        $$(By.cssSelector("img[src='https://apidata.mos.ru/v1/datasets/2105/marker']")).get(0).click();
+        $(By.xpath("//*[@id='dictionaryFilter-AdmArea']")).click();
+        $(By.cssSelector("#dropFilter-AdmArea > ul > li:nth-child(8)")).click();
+        $(By.xpath("//*[@id=\"dictionaryFilter-District\"]")).click();
+        $(By.cssSelector("#dropFilter-District > ul > li:nth-child(63)")).click();
     }
 
     @Test
-    public void CopyElementInTable() throws AWTException {
+    public void CopyElementInTable_DMru_15() throws IOException, UnsupportedFlavorException {
         openMainPage();
         $(withText("Образовательные учреждения города Москвы")).click();
         registerNewTab();
-        org.openqa.selenium.Point coordinates = $("#id_170807727").find(By.className("copy-card-url-link")).getLocation();
-        Robot robot = new Robot();
-        robot.mouseMove(coordinates.getX()-5, coordinates.getY());
-        //$("#id_170807727").find(By.className("copy-card-url-link")).click();
-        robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-        String s=Keys.CONTROL + "v";
-        Assert.assertEquals(s, "https://data.mos.ru/opendata/7719028495-obrazovatelnye-uchrejdeniya-goroda-moskvy/row/170807727");
-        //open(Keys.CONTROL + "v");
+
+        $$("#id_170807727").get(1).find(By.className("copy-card-url-link")).hover();
+
+        executeJavaScript("return document.querySelector('#linkTooltip > span.before').remove();"); //подсказки перекрывали
+        executeJavaScript("return document.querySelector('#linkTooltip > span.after').remove();"); //кнопку
+
+        $$("#id_170807727").get(1).find(By.className("copy-card-url-link")).click(); //скопирована в буфер
+
+        String data = (String)Toolkit.getDefaultToolkit()
+                .getSystemClipboard().getData(DataFlavor.stringFlavor);
+
+        Assert.assertEquals(data, "https://data.mos.ru/opendata/7719028495-obrazovatelnye-uchrejdeniya-goroda-moskvy/row/170807727");
     }
 
     @Test
-    public void DisplayElementInMap() throws AWTException {
+    public void DisplayElementInMap_DMru_18() {
         openMainPage();
         $(withText("Образовательные учреждения города Москвы")).click();
         registerNewTab();
-        WebElement element=$("#id_170807727").find(By.className("map-card-link"));
 
-        //((JavascriptExecutor)driver).executeScript("visibility.attr = visible;", element, 10);
-        //js.executeScript("$('#id_170807727 .map-card-link').attr('displayed', 'true')");
+        $(".loader-block").waitWhile(visible, 30000);
 
-        Point coordinates = $("#id_170807727").find(By.className("map-card-link")).getLocation();
-        Robot robot = new Robot();
-        robot.mouseMove(coordinates.getX(), coordinates.getY());
-        robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-
-        Assert.assertEquals($(By.id("mapCard")).attr("class"),"noCard"); //карта открылась
-
-        //getWebDriver();
-        //driver.action().mouseMove(element).click().pe‌​rform();
+        $$("#id_170807727").get(1).find(By.className("map-card-link")).hover().click();
+        Assert.assertNotEquals($(By.id("mapCard")).attr("class"),"noCard closed"); //карта открылась
     }
 }
